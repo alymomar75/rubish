@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Projet Géomatique - Tivaouane Peulh-Niaga</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <script src="DONNEES/limite.js"></script>
+    <script src="DONNEES/PNR.js"></script>
+    <script src="DONNEES/PP.js"></script>
+    <script src="DONNEES/Bac_de_rue.js"></script>
+    <script src="DONNEES/Caisse_Polybenne.js"></script>
+    <script src="DONNEES/deposau.js"></script>
+    <script src="DONNEES/bat.js"></script>
+
+    <style>
+        body { margin: 0; font-family: sans-serif; background-color: #0d2a4f; color: white; scroll-behavior: smooth; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #0d2a4f; height: 70px; position: sticky; top: 0; z-index: 1000; }
+        .logo-container { display: flex; gap: 15px; }
+        .logo { height: 50px; width: auto; cursor: pointer; border-radius: 5px; }
+        .action-btn { background: #1a4d8c; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .video-container { position: relative; width: 100%; height: calc(100vh - 70px); overflow: hidden; }
+        .bg-video { width: 100%; height: 100%; object-fit: cover; }
+        .overlay-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; }
+        .nav-menu { display: flex; justify-content: center; gap: 20px; padding: 15px; background: #0a213e; }
+        .nav-menu a { color: #ffffff; text-decoration: none; font-weight: bold; }
+        main { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h2 { color: #4fa3d1; margin-bottom: 20px; text-align: center; }
+        p { line-height: 1.8; color: #d1d1d1; text-align: center; }
+        .text-red { color: #ff4d4d; font-weight: bold; }
+        #viewDiv { height: 550px; width: 100%; border-radius: 10px; border: 2px solid #1a4d8c; margin-top: 25px; position: relative; }
+        #signalPanel { display:none; position:absolute; bottom:0; left:0; width:100%; height:320px; background:#0d2a4f; border-top-left-radius:20px; border-top-right-radius:20px; z-index:1500; padding:20px; box-sizing:border-box; border-top: 3px solid #4fa3d1; transition:0.3s; }
+        .btn-signal, .btn-pdf { background: #ff4d4d; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; display: block; margin: 20px auto; font-weight: bold; }
+        .btn-pdf { background: #28a745; }
+        .img-zone { display: block; width: 100%; max-width: 800px; margin: 30px auto; border-radius: 10px; }
+        .historique-images { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
+        .historique-images img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
+        .footer-section { background-color: #0a213e; padding: 30px; text-align: center; margin-top: 50px; border-top: 2px solid #4fa3d1; }
+        #contactInfo { display: none; margin-top: 15px; color: #4fa3d1; font-weight: bold; }
+        /* Style bouton retour */
+        #backToTop { position:fixed; bottom:20px; right:20px; padding:10px 15px; background:#4fa3d1; color:white; border:none; border-radius:50%; cursor:pointer; z-index:2000; display:none; }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="logo-container">
+            <a href="https://cedtleg15.com/" target="_blank"><img src="https://cedtleg15.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-22-at-18.43.22-300x300.jpeg.webp" alt="CEDT G15" class="logo"></a>
+            <a href="https://sonaged.sn/" target="_blank"><img src="https://sonaged.sn/wp-content/uploads/2025/01/cropped-logo_siteWeb-3.png" alt="SONAGED" class="logo"></a>
+        </div>
+        <div class="actions-container">
+            <button class="action-btn" onclick="window.scrollTo(0,0)">Accueil</button>
+            <button class="action-btn" onclick="document.getElementById('signalement').scrollIntoView({behavior:'smooth'})">Carte</button>
+        </div>
+    </header>
+
+    <section class="video-container" id="accueil">
+        <video autoplay muted loop playsinline class="bg-video">
+            <source src="https://d1p1y5pyxk2k6i.cloudfront.net/4medy%2Ffile%2Fec65fe6e8f3ecc3bce0f20f983350485_cb1c20077b06dd0f22bd78b96723212f.mp4?response-content-disposition=inline%3Bfilename%3D%22ec65fe6e8f3ecc3bce0f20f983350485_cb1c20077b06dd0f22bd78b96723212f.mp4%22%3B&response-content-type=video%2Fmp4&Expires=1782018261&Signature=O38z33Wn9sD6q0gI2Xby36SxxT4TJPJsCoDmgrt5UfSubQY~9vGNedFTDC1~pkwslj2igB0bfMKmIt1bzVBlx5QYjZXVIs222l7a2ZnSK63XM69FkHkgvkO9lE3mEQ8e28WmOtPSi7evL-R-5lLZRn0MuCc-KGD7Czr-Wl4Pzs7wxLW4hqG-a34vsVnZvS8Q1m2Ea6BLo7xD6Hx2zN583cEaucSWOWYySexFv6QJkmMYfzYu4IvrDxx9HqSZ5THiihUxiK31Qit2hbyZHBzxR9s6cFgxFj9B4sxmghlFW3UTi2G8HOrUxqT87YnQRH4oxHBUZQn6WU9sh3x1XkzInQ__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ" type="video/mp4">
+        </video>
+        <div class="overlay-text"><h1>Apport de la géomatique</h1><p>Commune de Tivaouane Peulh-Niaga</p></div>
+    </section>
+
+    <nav class="nav-menu">
+        <a href="#presentation">Présentation</a>
+        <a href="#historique">Historique</a>
+        <a href="#signalement">Carte & Signalement</a>
+    </nav>
+
+    <main id="contenu-pdf">
+        <section id="presentation">
+            <h2>Présentation</h2>
+            <p>Ce projet s'inscrit dans une démarche de modernisation de la gestion des déchets ménagers. Notre objectif est de <span class="text-red">cartographier les dépôts sauvages</span> grâce aux outils de la géomatique.</p>
+            <img src="https://cdn.corenexis.com/f/kRtzT6vWzHM.png" alt="Carte de zone" class="img-zone">
+        </section>
+
+        <section id="historique">
+            <h2>Historique</h2>
+            <p>La commune trouve ses racines dans un ensemble de villages historiques dont <strong>Tivaouane Peulh, Safco et Niaga</strong>. Avec la saturation de Dakar, la zone est devenue un pôle attractif. Ce dynamisme est illustré par la <strong>Cité Apix</strong>, créée sous l'ère du Président Abdoulaye Wade pour reloger les populations impactées par l'autoroute à péage. Symbole de l'expansion, elle cristallise aussi des défis de régularisation foncière et d'assainissement, nécessitant une gestion rigoureuse des déchets.</p>
+            <div class="historique-images">
+                <img src="https://www.dgpu.org/wp-content/uploads/2021/10/ZOOM-RETBA-SUD_Page_22-scaled-e1634153969504.jpg" alt="Retba 1">
+                <img src="https://www.dgpu.org/wp-content/uploads/2021/10/ZOOM-RETBA-SUD_Page_05-scaled-e1634153688549.jpg" alt="Retba 2">
+                <img src="https://actu.rts.sn/wp-content/uploads/2025/12/vill.jpg" alt="Village">
+            </div>
+        </section>
+
+        <section id="signalement">
+            <h2>Carte interactive et Signalement</h2>
+            <div id="viewDiv">
+                <div id="signalPanel">
+                    <h3 style="margin-top:0; color:#4fa3d1;">Signaler un dépôt</h3>
+                    <input type="text" id="lieuSignalement" placeholder="Saisir lieu ou cliquer sur carte..." style="width:100%; padding:10px; margin-bottom:10px; border-radius:5px; border:none; box-sizing:border-box;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <button onclick="choisirType('Gravats')" style="padding:10px; background:#1a4d8c; border:none; color:white; border-radius:5px; cursor:pointer;">Tas de gravats</button>
+                        <button onclick="choisirType('Déchets ménagers')" style="padding:10px; background:#1a4d8c; border:none; color:white; border-radius:5px; cursor:pointer;">Dépôts ordures</button>
+                    </div>
+                    <button onclick="document.getElementById('signalPanel').style.display='none'; modeSignalement=false;" style="width:100%; margin-top:15px; padding:8px; background:transparent; border:1px solid #ff4d4d; color:#ff4d4d; border-radius:5px; cursor:pointer;">Annuler</button>
+                </div>
+            </div>
+            <button class="btn-signal" onclick="activerModeSignalement()">Signaler un nouveau dépôt (Cliquer sur la carte)</button>
+        </section>
+    </main>
+
+    <footer class="footer-section">
+        <p>© 2026 - Projet réalisé par <strong>Aly Momar Diallo</strong> (BTS Géomatique CEDT G15)</p>
+        <button class="action-btn" onclick="document.getElementById('contactInfo').style.display='block'">Contact</button>
+        <div id="contactInfo">Email : alymomardiallo75@gmail.com</div>
+        <br><br>
+        <button class="btn-pdf" onclick="generatePDF()">Télécharger le rapport (PDF)</button>
+    </footer>
+
+    <button id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
+    <script src="https://js.arcgis.com/4.26/init.js"></script>
+    <script>
+        // Gestion bouton retour
+        window.onscroll = () => {
+            document.getElementById('backToTop').style.display = (window.scrollY > 300) ? "block" : "none";
+        };
+
+        function generatePDF() { html2pdf().from(document.getElementById('contenu-pdf')).save('Rapport_Geomatique_Tivaouane.pdf'); }
+        
+        let modeSignalement = false;
+        function activerModeSignalement() {
+            modeSignalement = true;
+            document.getElementById('signalPanel').style.display = 'block';
+            alert("Veuillez cliquer sur l'emplacement précis sur la carte.");
+        }
+
+        function choisirType(type) {
+            const lieu = document.getElementById('lieuSignalement').value;
+            if (lieu.trim() === "") { alert("Veuillez saisir le lieu ou cliquer sur la carte."); return; }
+            alert("Signalement enregistré : " + type + " à " + lieu);
+            document.getElementById('signalPanel').style.display = 'none';
+            modeSignalement = false;
+        }
+
+        require(["esri/Map", "esri/views/MapView", "esri/widgets/Legend", "esri/widgets/Search", "esri/widgets/Expand", "esri/layers/GeoJSONLayer", "esri/widgets/Locate"], 
+        (Map, MapView, Legend, Search, Expand, GeoJSONLayer, Locate) => {
+            const map = new Map({ basemap: "satellite" });
+            const view = new MapView({ container: "viewDiv", map: map, center: [-17.24, 14.83], zoom: 13 });
+
+            const locateBtn = new Locate({ view: view });
+            view.ui.add(locateBtn, "top-left");
+
+            view.on("click", (event) => {
+                if (modeSignalement) {
+                    const lat = event.mapPoint.latitude.toFixed(5);
+                    const lon = event.mapPoint.longitude.toFixed(5);
+                    document.getElementById('lieuSignalement').value = "Lat: " + lat + ", Lon: " + lon;
+                }
+            });
+
+            function addGeoJson(data, color, name, isPoly = false) {
+                if (typeof data === 'undefined') return;
+                const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+                map.add(new GeoJSONLayer({
+                    url: URL.createObjectURL(blob),
+                    title: name,
+                    renderer: { type: "simple", symbol: isPoly ? { type: "simple-fill", color: [0,255,255,0.2], outline: {color:"cyan", width:2} } : { type: "simple-marker", color: color, size: 8 } }
+                }));
+            }
+
+            addGeoJson(limite, 'cyan', 'Limite Communale', true);
+            addGeoJson(pnr, 'green', 'PNR');
+            addGeoJson(pp, 'orange', 'PP');
+            addGeoJson(deposau, 'red', 'Dépôts Sauvages');
+            addGeoJson(Bac_de_rue, 'blue', 'Bacs de rue');
+            addGeoJson(Caisse_Polybenne, 'yellow', 'Caisse Polybène');
+
+            view.ui.add(new Search({ view: view }), "top-right");
+            view.ui.add(new Expand({ content: new Legend({ view: view }) }), "bottom-left");
+        });
+    </script>
+</body>
+</html>

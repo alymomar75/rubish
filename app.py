@@ -1,11 +1,10 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# 1. Configuration : page en mode large, sans sidebar
+# 1. Configuration plein écran
 st.set_page_config(layout="wide", page_title="Géomatique - Tivaouane Peulh-Niaga")
 
-# 2. Masquage TOTAL de l'interface Streamlit (Menu, Sidebar, Header, Footer)
-# On force le padding à 0 pour que le contenu touche les bords
+# 2. Masquage TOTAL de l'interface Streamlit
 hide_everything = """
     <style>
     #MainMenu {visibility: hidden;}
@@ -17,7 +16,7 @@ hide_everything = """
 """
 st.markdown(hide_everything, unsafe_allow_html=True)
 
-# 3. Ton contenu HTML complet (le même que précédemment)
+# 3. Ton code HTML/CSS/JS complet
 html_content = """
 <!DOCTYPE html>
 <html lang="fr" style="width: 100%; height: 100%;">
@@ -27,7 +26,9 @@ html_content = """
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { margin: 0; font-family: sans-serif; background: #0d2a4f; color: white; }
-        .top-bar { display: flex; padding: 15px 40px; background: #0d2a4f; align-items: center; gap: 20px; }
+        .top-bar { display: flex; justify-content: space-between; padding: 15px 40px; background: #0d2a4f; align-items: center; }
+        .logo-group { display: flex; gap: 20px; }
+        .action-btn { background: #1a4d8c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .video-box { width: 100%; height: 500px; overflow: hidden; }
         .bg-video { width: 100%; height: 100%; object-fit: cover; }
         .content { max-width: 1200px; margin: auto; padding: 40px 20px; }
@@ -38,13 +39,16 @@ html_content = """
 </head>
 <body id="pdf-content">
     <header class="top-bar">
-        <img src="https://cedtleg15.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-22-at-18.43.22-300x300.jpeg.webp" style="height:50px;">
-        <img src="https://sonaged.sn/wp-content/uploads/2025/01/cropped-logo_siteWeb-3.png" style="height:50px;">
+        <div class="logo-group">
+            <img src="https://cedtleg15.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-22-at-18.43.22-300x300.jpeg.webp" style="height:50px;">
+            <img src="https://sonaged.sn/wp-content/uploads/2025/01/cropped-logo_siteWeb-3.png" style="height:50px;">
+        </div>
+        <button class="action-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">Accueil</button>
     </header>
 
     <div class="video-box">
         <video autoplay muted loop playsinline class="bg-video">
-            <source src="https://d1p1y5pyxk2k6i.cloudfront.net/4medy%2Ffile%2Fec65fe6e8f3ecc3bce0f20f983350485_cb1c20077b06dd0f22bd78b96723212f.mp4" type="video/mp4">
+            <source src="vache.mp4" type="video/mp4">
         </video>
     </div>
 
@@ -67,7 +71,7 @@ html_content = """
         require(["esri/Map", "esri/views/MapView", "esri/layers/GeoJSONLayer"], (Map, MapView, GeoJSONLayer) => {
             const map = new Map({ basemap: "satellite" });
             const view = new MapView({ container: "viewDiv", map: map, center: [-17.24, 14.83], zoom: 13 });
-            // Remplacer avec tes liens npoint
+            // Remplacer avec tes liens npoint.io
             const url = 'https://api.npoint.io/TON_ID_ICI';
             map.add(new GeoJSONLayer({ url: url }));
         });
@@ -76,5 +80,4 @@ html_content = """
 </html>
 """
 
-# Rendu sans scroll interne pour une fluidité totale
 components.html(html_content, height=2000, scrolling=False)

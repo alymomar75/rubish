@@ -1,53 +1,78 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# 1. Configuration plein écran
-st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
+# Configuration globale pour le plein écran
+st.set_page_config(layout="wide", page_title="Gestion Déchets - Tivaouane Peulh-Niaga")
 
-# 2. Injection des variables JSON directement dans le script
-# Remplace les {} par le contenu de tes fichiers JSON
-json_pnr = {"type": "FeatureCollection", "features": []}
-json_pp = {"type": "FeatureCollection", "features": []}
-
-# 3. Masquer interface Streamlit
-st.markdown("""<style>
-    [data-testid="stSidebar"] {display: none;}
-    .main {padding: 0 !important;}
-    header {visibility: hidden;}
+# Masquer l'interface Streamlit (header, menu, footer) pour un rendu "App"
+hide_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-</style>""", unsafe_allow_html=True)
+    header {visibility: hidden;}
+    .block-container {padding: 0 !important;}
+    </style>
+"""
+st.markdown(hide_style, unsafe_allow_html=True)
 
-# 4. Le HTML en mode 100% écran
-html_content = f"""
+# Code HTML/JS intégré
+html_code = """
 <!DOCTYPE html>
-<html lang="fr" style="height: 100%; width: 100%;">
-<body style="margin: 0; height: 100%; width: 100%; background-color: #0d2a4f; color: white;">
-    <div id="viewDiv" style="height: 100vh; width: 100vw;"></div>
-    
+<html>
+<head>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #0d2a4f; color: white; }
+        .top-bar { display: flex; padding: 10px 40px; background: #0d2a4f; align-items: center; gap: 20px; }
+        .video-box { width: 100%; height: 60vh; overflow: hidden; }
+        .bg-video { width: 100%; height: 100%; object-fit: cover; }
+        .content { max-width: 1000px; margin: auto; padding: 20px; }
+        #viewDiv { height: 500px; width: 100%; border: 3px solid #1a4d8c; border-radius: 10px; }
+        .grid-img { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .grid-img img { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; }
+    </style>
+</head>
+<body id="pdf-content">
+    <header class="top-bar">
+        <img src="https://cedtleg15.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-22-at-18.43.22-300x300.jpeg.webp" style="height:50px;">
+        <img src="https://sonaged.sn/wp-content/uploads/2025/01/cropped-logo_siteWeb-3.png" style="height:50px;">
+    </header>
+
+    <div class="video-box">
+        <video autoplay muted loop playsinline class="bg-video">
+            <source src="https://d1p1y5pyxk2k6i.cloudfront.net/4medy%2Ffile%2Fec65fe6e8f3ecc3bce0f20f983350485_cb1c20077b06dd0f22bd78b96723212f.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="content">
+        <h2>Présentation & Historique</h2>
+        <p>Projet de cartographie des déchets - Commune de Tivaouane Peulh-Niaga.</p>
+        <div class="grid-img">
+            <img src="https://www.dgpu.org/wp-content/uploads/2021/10/ZOOM-RETBA-SUD_Page_22-scaled-e1634153969504.jpg">
+            <img src="https://www.dgpu.org/wp-content/uploads/2021/10/ZOOM-RETBA-SUD_Page_05-scaled-e1634153688549.jpg">
+            <img src="https://actu.rts.sn/wp-content/uploads/2025/12/vill.jpg">
+        </div>
+        
+        <h2>Carte Interactive</h2>
+        <div id="viewDiv"></div>
+        <button onclick="html2pdf().from(document.getElementById('pdf-content')).save()" style="margin-top:20px; padding:10px; background:green; color:white; border:none;">Télécharger PDF</button>
+    </div>
+
     <script src="https://js.arcgis.com/4.26/init.js"></script>
     <script>
-        // Passage des variables Python vers JS
-        const dataPNR = {json_pnr};
-        const dataPP = {json_pp};
-
         require(["esri/Map", "esri/views/MapView", "esri/layers/GeoJSONLayer"], (Map, MapView, GeoJSONLayer) => {
             const map = new Map({ basemap: "satellite" });
             const view = new MapView({ container: "viewDiv", map: map, center: [-17.24, 14.83], zoom: 13 });
             
-            function addLocalData(data, color) {{
-                const blob = new Blob([JSON.stringify(data)], {{type: "application/json"}});
-                map.add(new GeoJSONLayer({{
-                    url: URL.createObjectURL(blob),
-                    renderer: {{ type: "simple", symbol: {{ type: "simple-marker", color: color, size: 8 }} }}
-                }}));
-            }}
-            
-            addLocalData(dataPNR, 'green');
-            addLocalData(dataPP, 'orange');
+            // INSÈRE ICI TES URLS NPOINT.IO
+            const urls = ['https://api.npoint.io/TON_ID_ICI']; 
+            urls.forEach(url => map.add(new GeoJSONLayer({ url: url })));
         });
     </script>
 </body>
 </html>
 """
 
-components.html(html_content, height=1000)
+# Rendu final
+components.html(html_code, height=1800)
